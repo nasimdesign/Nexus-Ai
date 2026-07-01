@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useAppStore } from "@/store/app-store"
 import { formatRelativeTime } from "@/lib/utils"
-import type { Message } from "@/types"
+import type { Message, Task } from "@/types"
 
 const suggestedPrompts = [
   { icon: Zap, label: "What should I focus on today?", category: "planning" },
@@ -152,7 +152,7 @@ export function Chat() {
       const priority = (["urgent", "high", "medium", "low"].includes(parts[1]?.toLowerCase()) ? parts[1].toLowerCase() : "medium") as any
       const project = parts[2] || "Inbox"
       const now = new Date().toISOString()
-      addTask({
+      const task: Task = {
         id: `T-${Date.now()}`,
         title,
         status: "todo",
@@ -163,7 +163,8 @@ export function Chat() {
         updatedAt: now,
         dueDate: new Date(Date.now() + 86400000).toISOString(),
         estimatedHours: 1,
-      })
+      }
+      addTask(task)
     } catch {
       // fallback silent
     }
@@ -173,7 +174,7 @@ export function Chat() {
   const handleManualTask = () => {
     if (!taskTitle.trim()) return
     const now = new Date().toISOString()
-    addTask({
+    const task: Task = {
       id: `T-${Date.now()}`,
       title: taskTitle.trim(),
       status: "todo",
@@ -184,7 +185,8 @@ export function Chat() {
       updatedAt: now,
       dueDate: new Date(Date.now() + 86400000).toISOString(),
       estimatedHours: 1,
-    })
+    }
+    addTask(task)
     setShowTaskModal(false)
     setTaskTitle("")
     setTaskPriority("medium")
