@@ -139,7 +139,7 @@ export function Chat() {
   // ── Auto task: ask AI to generate a task based on current context ─────────
   const handleAutoTask = useCallback(async () => {
     setIsAutoMenuOpen(false)
-    const prompt = "Based on my recent work context, suggest ONE specific actionable task I should do next. Reply with ONLY the task title (max 10 words), priority (urgent/high/medium/low), and project name, separated by | characters. Example: Prepare client demo slides|high|dxPOS v3"
+    const prompt = "Based on my recent work context, suggest ONE specific actionable task I should do next. Reply with ONLY the task title (max 10 words), priority (urgent/high/medium/low), and project name, separated by pipes. Example: Review API docs|high|Backend"
     try {
       const res = await fetch("/api/chat", {
         method: "POST",
@@ -151,6 +151,7 @@ export function Chat() {
       const title = parts[0] || "New AI Task"
       const priority = (["urgent", "high", "medium", "low"].includes(parts[1]?.toLowerCase()) ? parts[1].toLowerCase() : "medium") as any
       const project = parts[2] || "Inbox"
+      const now = new Date().toISOString()
       addTask({
         id: `T-${Date.now()}`,
         title,
@@ -158,7 +159,8 @@ export function Chat() {
         priority,
         project,
         assignee: "Nasim",
-        createdAt: new Date().toISOString(),
+        createdAt: now,
+        updatedAt: now,
         dueDate: new Date(Date.now() + 86400000).toISOString(),
         estimatedHours: 1,
       })
@@ -170,6 +172,7 @@ export function Chat() {
   // ── Manual task modal submit ───────────────────────────────────────────────
   const handleManualTask = () => {
     if (!taskTitle.trim()) return
+    const now = new Date().toISOString()
     addTask({
       id: `T-${Date.now()}`,
       title: taskTitle.trim(),
@@ -177,7 +180,8 @@ export function Chat() {
       priority: taskPriority as any,
       project: taskProject || "Inbox",
       assignee: "Nasim",
-      createdAt: new Date().toISOString(),
+      createdAt: now,
+      updatedAt: now,
       dueDate: new Date(Date.now() + 86400000).toISOString(),
       estimatedHours: 1,
     })
@@ -214,7 +218,10 @@ export function Chat() {
       setAbortController(null)
       setIsAIStreaming(false)
       setIsTyping(false)
-      if (activeConversationId) updateLastMessage(activeConversationId, activeConversation?.messages[activeConversation.messages.length - 1].content + " 🛑 *(Stopped)*")
+      if (activeConversationId && activeConversation?.messages.length) {
+        const lastMessage = activeConversation.messages[activeConversation.messages.length - 1]
+        updateLastMessage(activeConversationId, lastMessage.content + " 🛑 *(Stopped)*")
+      }
     }
   }, [abortController, setIsAIStreaming, activeConversationId, updateLastMessage, activeConversation])
 
@@ -454,7 +461,7 @@ export function Chat() {
                     >
                       <button
                         onClick={stopGenerating}
-                        className="flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-4 py-2 text-xs font-medium text-neutral-600 shadow-sm hover:bg-neutral-50 hover:text-neutral-900 transition-all"
+                        className="flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-4 py-2 text-xs font-medium text-neutral-600 shadow-sm hover:bg-neutral-50 hover:text-neutral-700 transition-colors"
                       >
                         <Square className="h-3.5 w-3.5 fill-neutral-600" />
                         Stop generating
@@ -472,7 +479,7 @@ export function Chat() {
                         <button
                           key={p.label}
                           onClick={() => sendMessage(p.label)}
-                          className="flex items-center gap-2.5 rounded-xl border border-neutral-200 bg-white px-4 py-3 text-left text-xs font-medium text-neutral-600 hover:border-primary hover:text-primary hover:shadow-sm transition-all group"
+                          className="flex items-center gap-2.5 rounded-xl border border-neutral-200 bg-white px-4 py-3 text-left text-xs font-medium text-neutral-600 hover:border-primary hover:text-neutral-800 transition-colors"
                         >
                           <Icon className="h-4 w-4 text-neutral-400 group-hover:text-primary transition-colors shrink-0" />
                           <span className="truncate">{p.label}</span>
@@ -506,7 +513,7 @@ export function Chat() {
                     <div className="relative" ref={menuRef}>
                       <button 
                         onClick={() => setIsAttachmentMenuOpen(!isAttachmentMenuOpen)}
-                        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors mb-0.5 ${isAttachmentMenuOpen ? 'bg-neutral-100 text-neutral-800' : 'text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100'}`}
+                        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors mb-0.5 ${isAttachmentMenuOpen ? 'bg-neutral-100 text-neutral-800' : 'text-neutral-400 hover:text-neutral-600 hover:bg-neutral-50'}`}
                       >
                         <Plus className={`h-5 w-5 transition-transform duration-200 ${isAttachmentMenuOpen ? 'rotate-45' : ''}`} />
                       </button>
@@ -518,7 +525,7 @@ export function Chat() {
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: 10, scale: 0.95 }}
                             transition={{ duration: 0.15, ease: "easeOut" }}
-                            className="absolute bottom-full left-0 mb-3 w-56 rounded-xl border border-neutral-200 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.08)] overflow-hidden flex flex-col p-1.5 z-50 origin-bottom-left"
+                            className="absolute bottom-full left-0 mb-3 w-56 rounded-xl border border-neutral-200 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.08)] overflow-hidden flex flex-col p-1.5 z-50"
                           >
                             <button
                               onClick={() => {
@@ -585,7 +592,10 @@ export function Chat() {
                               className="flex items-center justify-between rounded-md px-2.5 py-2 text-sm text-neutral-600 hover:bg-neutral-100 transition-colors text-left font-medium"
                             >
                               <div className="flex items-center gap-3">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-globe"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/></svg>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-globe">
+                                  <circle cx="12" cy="12" r="10"></circle>
+                                  <path d="M12 2a14.5 14.5 0 0 1 10 4.3M12 2a14.5 14.5 0 0 0-10 4.2M12 2v20M2 12a10 10 0 0 1 18.8-4M22 12a10 10 0 0 1-18.8 4"></path>
+                                </svg>
                                 Web search
                               </div>
                               <Check className="h-4 w-4 text-primary" />
@@ -613,7 +623,7 @@ export function Chat() {
                     <button
                       onClick={() => sendMessage(input)}
                       disabled={(!input.trim() && attachments.length === 0) || isAIStreaming}
-                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary text-white hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed transition-all active:scale-95 mb-0.5 shadow-sm"
+                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary text-white hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                     >
                       <Send className="h-4 w-4 ml-0.5" />
                     </button>
@@ -691,7 +701,7 @@ export function Chat() {
                       <select
                         value={useAppStore.getState().aiModel}
                         onChange={(e) => useAppStore.getState().setAiModel(e.target.value)}
-                        className="h-5 cursor-pointer appearance-none rounded bg-transparent pl-2 pr-5 text-[10px] font-medium text-neutral-400 hover:text-neutral-600 hover:bg-neutral-50 focus:outline-none focus:ring-0 transition-colors"
+                        className="h-5 cursor-pointer appearance-none rounded bg-transparent pl-2 pr-5 text-[10px] font-medium text-neutral-400 hover:text-neutral-600 hover:bg-neutral-50 focus:outline-none"
                       >
                         <option value="anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet</option>
                         <option value="openai/gpt-4o">GPT-4o</option>
@@ -771,7 +781,7 @@ export function Chat() {
                       onChange={(e) => setTaskTitle(e.target.value)}
                       onKeyDown={(e) => { if (e.key === "Enter") handleManualTask() }}
                       placeholder="e.g. Prepare client presentation"
-                      className="w-full rounded-xl border border-neutral-200 bg-neutral-50 px-3 py-2.5 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all"
+                      className="w-full rounded-xl border border-neutral-200 bg-neutral-50 px-3 py-2.5 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                     />
                   </div>
 
@@ -782,7 +792,7 @@ export function Chat() {
                       <select
                         value={taskPriority}
                         onChange={(e) => setTaskPriority(e.target.value)}
-                        className="w-full rounded-xl border border-neutral-200 bg-neutral-50 px-3 py-2.5 text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all appearance-none"
+                        className="w-full rounded-xl border border-neutral-200 bg-neutral-50 px-3 py-2.5 text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                       >
                         <option value="urgent">🔴 Urgent</option>
                         <option value="high">🟠 High</option>
@@ -796,7 +806,7 @@ export function Chat() {
                         value={taskProject}
                         onChange={(e) => setTaskProject(e.target.value)}
                         placeholder="Inbox"
-                        className="w-full rounded-xl border border-neutral-200 bg-neutral-50 px-3 py-2.5 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all"
+                        className="w-full rounded-xl border border-neutral-200 bg-neutral-50 px-3 py-2.5 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                       />
                     </div>
                   </div>
