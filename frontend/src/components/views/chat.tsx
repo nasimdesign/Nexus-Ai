@@ -373,7 +373,7 @@ export function Chat() {
           <>
             <ScrollArea className="flex-1 px-8 py-6">
               <div className="max-w-[760px] mx-auto space-y-8 pb-32">
-                {activeConversation.messages.map((msg, index) => (
+                {activeConversation.messages.map((msg) => (
                   <motion.div
                     key={msg.id}
                     initial={{ opacity: 0, y: 10 }}
