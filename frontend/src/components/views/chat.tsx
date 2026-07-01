@@ -38,7 +38,7 @@ function TypingIndicator() {
 function CodeBlock({ node, inline, className, children, ...props }: any) {
   const [copied, setCopied] = useState(false)
   const match = /language-(\w+)/.exec(className || '')
-  
+
   const handleCopy = () => {
     navigator.clipboard.writeText(String(children).replace(/\n$/, ''))
     setCopied(true)
@@ -193,8 +193,6 @@ export function Chat() {
     setTaskProject("Inbox")
   }
 
-
-
   const activeConversation = conversations.find((c) => c.id === activeConversationId)
 
   useEffect(() => {
@@ -209,7 +207,7 @@ export function Chat() {
     }
     if (fileInputRef.current) fileInputRef.current.value = ""
   }
-  
+
   const removeAttachment = (index: number) => {
     setAttachments(prev => prev.filter((_, i) => i !== index))
   }
@@ -247,22 +245,22 @@ export function Chat() {
 
     setIsTyping(true)
     setIsAIStreaming(true)
-    
+
     const controller = new AbortController()
     setAbortController(controller)
 
     try {
-      const messagesForApi = activeConversation 
+      const messagesForApi = activeConversation
         ? [...activeConversation.messages, userMsg].map(m => ({ role: m.role, content: m.content }))
         : [{ role: "user", content: t }]
 
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          messages: messagesForApi, 
+        body: JSON.stringify({
+          messages: messagesForApi,
           modelId: useAppStore.getState().aiModel,
-          apiKey: useAppStore.getState().apiKey 
+          apiKey: useAppStore.getState().apiKey
         }),
         signal: controller.signal
       })
@@ -388,7 +386,7 @@ export function Chat() {
                         <Sparkles className="h-4 w-4" />
                       </div>
                     )}
-                    
+
                     <div
                       className={`group relative max-w-[85%] rounded-2xl px-5 py-3.5 ${
                         msg.role === "user"
@@ -397,9 +395,9 @@ export function Chat() {
                       }`}
                     >
                       {msg.role === "assistant" ? (
-                        <div className="prose prose-sm prose-neutral max-w-none text-neutral-800 
-                          [&_table]:w-full [&_table]:text-sm [&_th]:py-2 [&_th]:px-3 [&_th]:bg-neutral-50 
-                          [&_td]:py-2 [&_td]:px-3 [&_table]:border-collapse [&_td]:border [&_td]:border-neutral-100 
+                        <div className="prose prose-sm prose-neutral max-w-none text-neutral-800
+                          [&_table]:w-full [&_table]:text-sm [&_th]:py-2 [&_th]:px-3 [&_th]:bg-neutral-50
+                          [&_td]:py-2 [&_td]:px-3 [&_table]:border-collapse [&_td]:border [&_td]:border-neutral-100
                           [&_th]:border [&_th]:border-neutral-100 [&_a]:text-primary [&_a]:no-underline hover:[&_a]:underline"
                         >
                           <ReactMarkdown
@@ -416,7 +414,7 @@ export function Chat() {
 
                       {msg.role === "assistant" && !msg.isStreaming && (
                         <div className="absolute -bottom-6 left-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2">
-                          <button 
+                          <button
                             onClick={() => navigator.clipboard.writeText(msg.content)}
                             className="flex items-center gap-1 text-[10px] font-medium text-neutral-400 hover:text-neutral-700 transition-colors"
                           >
@@ -451,7 +449,7 @@ export function Chat() {
             {/* Input area & Stop Generating */}
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-white via-white to-transparent pt-10 pb-6 px-8">
               <div className="max-w-[760px] mx-auto relative">
-                
+
                 {/* Stop generating button */}
                 <AnimatePresence>
                   {isAIStreaming && (
@@ -493,7 +491,7 @@ export function Chat() {
 
                 {/* Main Input box */}
                 <div className="relative flex flex-col gap-1 rounded-2xl border border-neutral-300 bg-white p-2 shadow-sm transition-all focus-within:border-neutral-400">
-                  
+
                   {/* Attachments Area */}
                   {attachments.length > 0 && (
                     <div className="flex flex-wrap gap-2 px-1 mb-1">
@@ -511,15 +509,15 @@ export function Chat() {
 
                   <div className="flex items-end gap-2">
                     <input type="file" multiple className="hidden" ref={fileInputRef} onChange={handleFileUpload} />
-                    
+
                     <div className="relative" ref={menuRef}>
-                      <button 
+                      <button
                         onClick={() => setIsAttachmentMenuOpen(!isAttachmentMenuOpen)}
                         className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors mb-0.5 ${isAttachmentMenuOpen ? 'bg-neutral-100 text-neutral-800' : 'text-neutral-400 hover:text-neutral-600 hover:bg-neutral-50'}`}
                       >
                         <Plus className={`h-5 w-5 transition-transform duration-200 ${isAttachmentMenuOpen ? 'rotate-45' : ''}`} />
                       </button>
-                      
+
                       <AnimatePresence>
                         {isAttachmentMenuOpen && (
                           <motion.div
@@ -546,9 +544,9 @@ export function Chat() {
                               <CheckSquare className="h-4 w-4" />
                               Add to project
                             </button>
-                            
+
                             <div className="my-1 h-[1px] bg-neutral-100 mx-2" />
-                            
+
                             <button
                               onClick={() => setIsAttachmentMenuOpen(false)}
                               className="flex items-center justify-between rounded-md px-2.5 py-1.5 text-sm text-neutral-600 hover:bg-neutral-100 transition-colors text-left font-medium"
@@ -579,9 +577,9 @@ export function Chat() {
                               </div>
                               <span className="text-neutral-400 text-xs text-right">&gt;</span>
                             </button>
-                            
+
                             <div className="my-1 h-[1px] bg-neutral-100 mx-2" />
-                            
+
                             <button
                               onClick={() => setIsAttachmentMenuOpen(false)}
                               className="flex items-center gap-3 rounded-md px-2.5 py-2 text-sm text-neutral-600 hover:bg-neutral-100 transition-colors text-left font-medium"
@@ -606,7 +604,7 @@ export function Chat() {
                         )}
                       </AnimatePresence>
                     </div>
-                    
+
                     <textarea
                       ref={inputRef}
                       value={input}
@@ -621,7 +619,7 @@ export function Chat() {
                       className="flex-1 resize-none bg-transparent text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-0 leading-relaxed py-1.5"
                       style={{ maxHeight: 200 }}
                     />
-                    
+
                     <button
                       onClick={() => sendMessage(input)}
                       disabled={(!input.trim() && attachments.length === 0) || isAIStreaming}
