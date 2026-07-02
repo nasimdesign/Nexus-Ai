@@ -198,6 +198,7 @@ export function Tasks() {
                 project: "Inbox",
                 assignee: "Nasim",
                 createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
                 dueDate: new Date(Date.now() + 86400000).toISOString(),
                 estimatedHours: 1,
               }
@@ -216,6 +217,7 @@ export function Tasks() {
               project: "Nexus AI",
               assignee: "Nasim",
               createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
               dueDate: new Date(Date.now() + 172800000).toISOString(),
               estimatedHours: 2,
             }

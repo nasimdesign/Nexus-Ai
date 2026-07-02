@@ -40,6 +40,7 @@ export interface Project {
   dueDate?: string
   members?: string[]
   description?: string
+  createdAt?: string
 }
 
 export interface TimesheetEntry {
