@@ -16,6 +16,7 @@ interface AppStore {
 
   // Projects
   projects: Project[]
+  addProject: (project: Project) => void
 
   // Chat
   conversations: Conversation[]
@@ -58,6 +59,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
   deleteTask: (id) => set((s) => ({ tasks: s.tasks.filter((t) => t.id !== id) })),
 
   projects: mockProjects,
+  addProject: (project) => set((s) => ({ projects: [project, ...s.projects] })),
 
   conversations: mockConversations,
   activeConversationId: "c1",

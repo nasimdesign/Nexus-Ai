@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { useAppStore } from "@/store/app-store"
 import { formatDate } from "@/lib/utils"
+import type { Project } from "@/types"
 
 const statusBadge: Record<string, "success" | "warning" | "secondary" | "outline"> = {
   active: "success",
@@ -21,7 +22,7 @@ const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { st
 const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } }
 
 export function Projects() {
-  const { projects, tasks, addProject } = useAppStore() as any
+  const { projects, tasks, addProject } = useAppStore()
 
   return (
     <div className="p-6 max-w-5xl">
@@ -34,12 +35,12 @@ export function Projects() {
           const name = window.prompt("Project name:")
           if (!name) return
           const client = window.prompt("Client name (optional):")
-          const newProject = {
+          const newProject: Project = {
             id: `P-${Date.now()}`,
             name,
             client: client || undefined,
             description: "",
-            status: "active" as const,
+            status: "active",
             progress: 0,
             color: `hsl(${Math.floor(Math.random() * 360)}, 70%, 55%)`,
             tasksTotal: 0,
@@ -48,8 +49,7 @@ export function Projects() {
             members: ["Nasim"],
             createdAt: new Date().toISOString(),
           }
-          if (typeof addProject === 'function') addProject(newProject)
-          else window.alert(`Project "${name}" created! (Store support needed to persist)`)
+          addProject(newProject)
         }}>
           <Plus className="h-3.5 w-3.5" /> New project
         </Button>
