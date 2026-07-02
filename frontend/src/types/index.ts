@@ -2,6 +2,15 @@ export type Priority = "urgent" | "high" | "medium" | "low"
 export type TaskStatus = "todo" | "in_progress" | "in_review" | "done" | "cancelled"
 export type ProjectStatus = "active" | "on_hold" | "completed" | "archived"
 
+export interface User {
+  id: string
+  name: string
+  email: string
+  avatar?: string
+  role?: string
+  company?: string
+}
+
 export interface Task {
   id: string
   title: string
@@ -76,12 +85,21 @@ export interface ActionItem {
   completed: boolean
 }
 
+export interface Attachment {
+  id: string
+  name: string
+  type: string
+  size: number
+  content?: string // base64 for text files
+}
+
 export interface Message {
   id: string
   role: "user" | "assistant"
   content: string
   timestamp: string
   isStreaming?: boolean
+  attachments?: Attachment[]
 }
 
 export interface Conversation {

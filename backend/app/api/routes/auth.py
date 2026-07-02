@@ -2,6 +2,7 @@
 Auth API routes — login, signup, refresh, logout, me.
 """
 import logging
+import uuid
 from datetime import datetime, timezone, timedelta
 from fastapi import APIRouter, Depends, HTTPException, Response, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -167,3 +168,36 @@ async def update_me(
     await db.commit()
     await db.refresh(current_user)
     return _user_dict(current_user)
+
+# New Google OAuth endpoint
+@router.post("/google", response_model=AuthResponse)
+async def google_login(token: str, response: Response, db: AsyncSession = Depends(get_db)):
+    """Accept a Google ID token, verify it, and log the user in or sign up.
+    The client should obtain the ID token via Google Sign‑In on the frontend.
+    """
+    try:
+        from google.oauth2 import id_token as google_id_token
+        from google.auth.transport import requests as google_requests
+    except ImportError:
+        raise HTTPException(status_code=500, detail="Google auth libraries not installed")
+
+    try:
+        idinfo = google_id_token.verify_oauth2_token(token, google_requests.Request())
+        email = idinfo.get("email")
+        name = idinfo.get("name") or email.split("@")[0]
+    except Exception as e:
+        raise HTTPException(status_code=401, detail="Invalid Google token")
+
+    # Find or create user
+    result = await db.execute(select(User).where(User.email == email))
+    user = result.scalar_one_or_none()
+    if not user:
+        user = User(email=email, name=name, hashed_password=hash_password(uuid.uuid4().hex))
+        db.add(user)
+        await db.commit()
+        await db.refresh(user)
+
+    access_token = create_access_token({"sub": user.id})
+    refresh_token = create_refresh_token({"sub": user.id})
+    _set_refresh_cookie(response, refresh_token)
+    return AuthResponse(access_token=access_token, user=_user_dict(user))

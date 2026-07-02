@@ -42,7 +42,7 @@ const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { st
 const item = { hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } }
 
 export function Settings() {
-  const { aiModel, setAiModel, apiKey, setApiKey } = useAppStore()
+  const { aiModel, setAiModel } = useAppStore()
   const [activeTab, setActiveTab] = useState<SettingsTab>("profile")
   const [saved, setSaved] = useState(false)
   const [prefs, setPrefs] = useState({
@@ -157,9 +157,9 @@ export function Settings() {
                   <CardHeader><CardTitle>Model Selection</CardTitle></CardHeader>
                   <CardContent className="space-y-3">
                     {[
-                      { id: "claude-3-5-sonnet-20240620", name: "Claude 3.5 Sonnet", badge: "Default", desc: "Best for reasoning and long context" },
-                      { id: "gpt-4o", name: "GPT-4o", badge: "", desc: "Excellent for code and structured output" },
-                      { id: "gemini-1.5-pro-latest", name: "Gemini 1.5 Pro", badge: "", desc: "Great multimodal understanding" },
+                      { id: "nousresearch/hermes-3-llama-3.1-405b", name: "Hermes 3 (Llama 3.1)", badge: "Default", desc: "Best open-source reasoning model by NousResearch" },
+                      { id: "claude-3-5-sonnet-20240620", name: "Claude 3.5 Sonnet", badge: "", desc: "Excellent for coding and long context" },
+                      { id: "gpt-4o", name: "GPT-4o", badge: "", desc: "Fast and intelligent multimodal model" },
                     ].map((m) => (
                       <div
                         key={m.id}
@@ -184,19 +184,9 @@ export function Settings() {
                     
                     <div className="pt-4 border-t border-neutral-100 mt-2">
                       <div className="flex flex-col gap-2">
-                        <label className="text-sm font-medium text-neutral-800">
-                          {aiModel.includes("claude") ? "Anthropic API Key" : aiModel.includes("gpt") ? "OpenAI API Key" : "Google Gemini API Key"}
-                        </label>
                         <p className="text-xs text-neutral-500 mb-1">
-                          Required for live AI responses. If left empty, it will use a local mock.
+                          API Key is securely managed in the server configuration.
                         </p>
-                        <Input 
-                          type="password"
-                          value={apiKey}
-                          onChange={(e) => setApiKey(e.target.value)}
-                          placeholder="sk-..."
-                          className="bg-neutral-50"
-                        />
                       </div>
                     </div>
                   </CardContent>

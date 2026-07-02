@@ -5,8 +5,10 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.core.database import Base
 
 
+
 def utcnow():
     return datetime.now(timezone.utc)
+
 
 
 class Project(Base):
@@ -31,6 +33,7 @@ class Project(Base):
     timesheets: Mapped[list["Timesheet"]] = relationship(back_populates="project")
 
 
+
 class Task(Base):
     __tablename__ = "tasks"
 
@@ -49,7 +52,6 @@ class Task(Base):
     assignee: Mapped[str | None] = mapped_column(String(255), nullable=True)
     erpnext_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
     is_deleted: Mapped[bool] = mapped_column(Boolean, default=False)
-
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
@@ -57,6 +59,7 @@ class Task(Base):
     user: Mapped["User"] = relationship(back_populates="tasks")
     project: Mapped["Project | None"] = relationship(back_populates="tasks")
     subtasks: Mapped[list["SubTask"]] = relationship(back_populates="task", cascade="all, delete-orphan")
+
 
 
 class SubTask(Base):

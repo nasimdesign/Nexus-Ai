@@ -12,6 +12,7 @@ import logging
 from typing import AsyncGenerator, Any
 from openai import AsyncOpenAI
 import httpx
+from anthropic import AsyncAnthropic
 
 from app.core.config import settings
 
@@ -111,14 +112,11 @@ TOOLS = [
 ]
 
 
-def _build_client(user=None) -> AsyncOpenAI:
-    """Build the best available OpenAI-compatible client for this user."""
-    # 1. User's own Anthropic key → use Claude via Anthropic-compatible OpenAI SDK
+def _build_client(user=None):
+    """Build the best available client for this user."""
+    # 1. User's own Anthropic key → use Claude via Anthropic SDK
     if user and user.anthropic_api_key:
-        return AsyncOpenAI(
-            api_key=user.anthropic_api_key,
-            base_url="https://api.anthropic.com/v1",
-        )
+        return AsyncAnthropic(api_key=user.anthropic_api_key)
     # 2. User's own OpenAI key
     if user and user.openai_api_key:
         return AsyncOpenAI(api_key=user.openai_api_key)
@@ -127,10 +125,7 @@ def _build_client(user=None) -> AsyncOpenAI:
         return AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
     # 4. Global Anthropic key
     if settings.ANTHROPIC_API_KEY:
-        return AsyncOpenAI(
-            api_key=settings.ANTHROPIC_API_KEY,
-            base_url="https://api.anthropic.com/v1",
-        )
+        return AsyncAnthropic(api_key=settings.ANTHROPIC_API_KEY)
     # 5. Free Pollinations fallback (no key required)
     return AsyncOpenAI(
         api_key="anonymous",
@@ -170,50 +165,72 @@ async def stream_chat(
     full_messages = [{"role": "system", "content": SYSTEM_PROMPT}] + messages
 
     try:
-        kwargs: dict[str, Any] = {
-            "model": model,
-            "messages": full_messages,
-            "stream": True,
-            "max_tokens": 4096,
-        }
-        # Only add tools for capable models
-        if tools and not model.startswith("openai"):
-            kwargs["tools"] = TOOLS
-            kwargs["tool_choice"] = "auto"
+        # Check if client is Anthropic
+        is_anthropic = isinstance(client, AsyncAnthropic)
+        
+        if is_anthropic:
+            # For Anthropic, use the Messages API
+            stream = await client.messages.create(
+                model=model,
+                max_tokens=4096,
+                messages=full_messages,
+                stream=True,
+            )
+            
+            async for chunk in stream:
+                if chunk.type == "content_block_delta":
+                    if chunk.delta.type == "text_delta":
+                        # Properly escape newlines in the f-string
+                        yield f"data: {{'type': 'text', 'text': {chunk.delta.text!r}}}\n\n"
+                elif chunk.type == "message_stop":
+                    yield "data: [DONE]\n\n"
+        else:
+            # For OpenAI-compatible clients
+            kwargs: dict[str, Any] = {
+                "model": model,
+                "messages": full_messages,
+                "stream": True,
+                "max_tokens": 4096,
+            }
+            # Only add tools for OpenAI-compatible models (OpenAI, Pollinations)
+            # Disable tools for Anthropic, Gemini, etc. when using OpenAI client due to format incompatibility
+            if tools and model.startswith("openai"):
+                kwargs["tools"] = TOOLS
+                kwargs["tool_choice"] = "auto"
 
-        stream = await client.chat.completions.create(**kwargs)
+            stream = await client.chat.completions.create(**kwargs)
 
-        collected_tool_calls = {}
-        async for chunk in stream:
-            delta = chunk.choices[0].delta if chunk.choices else None
-            if delta is None:
-                continue
+            collected_tool_calls = {}
+            async for chunk in stream:
+                delta = chunk.choices[0].delta if chunk.choices else None
+                if delta is None:
+                    continue
 
-            # Handle regular text tokens
-            if delta.content:
-                yield f"data: {json.dumps({'type': 'text', 'text': delta.content})}\n\n"
+                # Handle regular text tokens
+                if delta.content:
+                    yield f"data: {{'type': 'text', 'text': {delta.content!r}}}\n\n"
 
-            # Handle tool call streaming
-            if hasattr(delta, "tool_calls") and delta.tool_calls:
-                for tc in delta.tool_calls:
-                    idx = tc.index
-                    if idx not in collected_tool_calls:
-                        collected_tool_calls[idx] = {"id": tc.id or "", "name": "", "arguments": ""}
-                    if tc.function.name:
-                        collected_tool_calls[idx]["name"] = tc.function.name
-                    if tc.function.arguments:
-                        collected_tool_calls[idx]["arguments"] += tc.function.arguments
+                # Handle tool call streaming
+                if hasattr(delta, "tool_calls") and delta.tool_calls:
+                    for tc in delta.tool_calls:
+                        idx = tc.index
+                        if idx not in collected_tool_calls:
+                            collected_tool_calls[idx] = {"id": tc.id or "", "name": "", "arguments": ""}
+                        if tc.function.name:
+                            collected_tool_calls[idx]["name"] = tc.function.name
+                        if tc.function.arguments:
+                            collected_tool_calls[idx]["arguments"] += tc.function.arguments
 
-        # Emit collected tool calls
-        for tc in collected_tool_calls.values():
-            yield f"data: {json.dumps({'type': 'tool_call', 'tool': tc})}\n\n"
+            # Emit collected tool calls
+            for tc in collected_tool_calls.values():
+                yield f"data: {{'type': 'tool_call', 'tool': tc}}\n\n"
 
-        yield "data: [DONE]\n\n"
+            yield "data: [DONE]\n\n"
 
     except Exception as e:
         logger.error(f"AI stream error: {e}")
         error_msg = str(e)
-        yield f"data: {json.dumps({'type': 'error', 'message': error_msg})}\n\n"
+        yield f"data: {{'type': 'error', 'message': {error_msg!r}}}\n\n"
         yield "data: [DONE]\n\n"
 
 

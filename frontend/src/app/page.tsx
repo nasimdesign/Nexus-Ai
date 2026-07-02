@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Sidebar } from "@/components/layout/sidebar"
 import { TopNav } from "@/components/layout/topnav"
@@ -15,6 +15,7 @@ import { Meetings } from "@/components/views/meetings"
 import { Analytics } from "@/components/views/analytics"
 import { KnowledgeBase } from "@/components/views/knowledge-base"
 import { Settings } from "@/components/views/settings"
+import Login from "@/components/views/login"
 import { useAppStore } from "@/store/app-store"
 
 function ActiveView({ section }: { section: string }) {
@@ -37,7 +38,13 @@ function ActiveView({ section }: { section: string }) {
 const fullHeightSections = new Set(["chat", "calendar", "tasks", "meetings", "knowledge", "settings"])
 
 export default function App() {
-  const { activeSection, setCommandPaletteOpen } = useAppStore()
+  const { activeSection, setCommandPaletteOpen, isAuthenticated, login, signup, loginWithGoogle, initAuth, sidebarOpen, setSidebarOpen } = useAppStore()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    initAuth()
+    setMounted(true)
+  }, [initAuth])
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -50,13 +57,49 @@ export default function App() {
     return () => window.removeEventListener("keydown", handler)
   }, [setCommandPaletteOpen])
 
+  // Don't render until mounted to avoid hydration mismatch with localStorage
+  if (!mounted) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-[#0a0a0a]">
+        <div className="flex items-center gap-3">
+          <div className="h-8 w-8 border-2 border-purple-500/30 border-t-purple-500 rounded-full animate-spin" />
+          <span className="text-neutral-400 text-sm">Loading Nexus AI…</span>
+        </div>
+      </div>
+    )
+  }
+
+  if (!isAuthenticated) {
+    return <Login onLogin={login} onSignup={signup} onGoogleLogin={loginWithGoogle} />
+  }
+
   const isFull = fullHeightSections.has(activeSection)
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#FAFAFA]">
-      <Sidebar />
+    <div className="flex h-screen overflow-hidden bg-surface">
+      {/* Mobile overlay */}
+      <AnimatePresence>
+        {sidebarOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setSidebarOpen(false)}
+            className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm lg:hidden"
+          />
+        )}
+      </AnimatePresence>
 
-      <div className="flex flex-1 flex-col overflow-hidden">
+      {/* Sidebar */}
+      <div className={`
+        fixed inset-y-0 left-0 z-50 lg:relative lg:z-auto
+        transform transition-transform duration-200 ease-out
+        ${sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
+      `}>
+        <Sidebar />
+      </div>
+
+      <div className="flex flex-1 flex-col overflow-hidden min-w-0">
         <TopNav />
 
         <main className={`flex-1 overflow-auto ${isFull ? "flex flex-col" : ""}`}>

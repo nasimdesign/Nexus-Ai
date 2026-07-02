@@ -1,0 +1,126 @@
+
+> frontend@0.1.0 build
+> next build
+
+⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of /Users/designer/package-lock.json as the root directory.
+ To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
+ Detected additional lockfiles: 
+   * /Users/designer/Downloads/nexus-ai/frontend/package-lock.json
+
+▲ Next.js 16.2.9 (Turbopack)
+- Environments: .env.local
+
+  Creating an optimized production build ...
+
+> Build error occurred
+Error: Turbopack build failed with 4 errors:
+./Downloads/nexus-ai/frontend/src/components/views/login.tsx:5:1
+Export Chrome doesn't exist in target module
+  [90m3 |[0m ...seState } [36mfrom[0m [32m"react"[0m
+  [90m4 |[0m ...[33mAnimatePresence[0m } [36mfrom[0m [32m"framer-motion"[0m
+[31m[1m>[0m [90m5 |[0m ...[33ml[0m, [33mLock[0m, [33mUser[0m, [33mArrowRight[0m, [33mEye[0m, [33mEyeOff[0m, [33mSparkles[0m, [33mGithub[0m, [33mChrome[0m } [36mf...[0m
+  [90m  |[0m    [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m6 |[0m ...
+  [90m7 |[0m ...[33mops[0m {
+  [90m8 |[0m ...: string, password: string) => [33mPromise[0m<[36mvoid[0m>
+
+The export Chrome was not found in module [project]/Downloads/nexus-ai/frontend/node_modules/lucide-react/dist/esm/lucide-react.mjs [app-client] (ecmascript).
+Did you mean to import ChartColumnDecreasing?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./Downloads/nexus-ai/frontend/src/components/views/login.tsx [Client Component Browser]
+    ./Downloads/nexus-ai/frontend/src/app/page.tsx [Client Component Browser]
+    ./Downloads/nexus-ai/frontend/src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./Downloads/nexus-ai/frontend/src/components/views/login.tsx [Client Component SSR]
+    ./Downloads/nexus-ai/frontend/src/app/page.tsx [Client Component SSR]
+    ./Downloads/nexus-ai/frontend/src/app/page.tsx [Server Component]
+
+
+./Downloads/nexus-ai/frontend/src/components/views/login.tsx:5:1
+Export Chrome doesn't exist in target module
+  [90m3 |[0m ...seState } [36mfrom[0m [32m"react"[0m
+  [90m4 |[0m ...[33mAnimatePresence[0m } [36mfrom[0m [32m"framer-motion"[0m
+[31m[1m>[0m [90m5 |[0m ...[33ml[0m, [33mLock[0m, [33mUser[0m, [33mArrowRight[0m, [33mEye[0m, [33mEyeOff[0m, [33mSparkles[0m, [33mGithub[0m, [33mChrome[0m } [36mf...[0m
+  [90m  |[0m    [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m6 |[0m ...
+  [90m7 |[0m ...[33mops[0m {
+  [90m8 |[0m ...: string, password: string) => [33mPromise[0m<[36mvoid[0m>
+
+The export Chrome was not found in module [project]/Downloads/nexus-ai/frontend/node_modules/lucide-react/dist/esm/lucide-react.mjs [app-ssr] (ecmascript).
+Did you mean to import ChartColumnDecreasing?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./Downloads/nexus-ai/frontend/src/components/views/login.tsx [Client Component Browser]
+    ./Downloads/nexus-ai/frontend/src/app/page.tsx [Client Component Browser]
+    ./Downloads/nexus-ai/frontend/src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./Downloads/nexus-ai/frontend/src/components/views/login.tsx [Client Component SSR]
+    ./Downloads/nexus-ai/frontend/src/app/page.tsx [Client Component SSR]
+    ./Downloads/nexus-ai/frontend/src/app/page.tsx [Server Component]
+
+
+./Downloads/nexus-ai/frontend/src/components/views/login.tsx:5:1
+Export Github doesn't exist in target module
+  [90m3 |[0m ...seState } [36mfrom[0m [32m"react"[0m
+  [90m4 |[0m ...[33mAnimatePresence[0m } [36mfrom[0m [32m"framer-motion"[0m
+[31m[1m>[0m [90m5 |[0m ...[33ml[0m, [33mLock[0m, [33mUser[0m, [33mArrowRight[0m, [33mEye[0m, [33mEyeOff[0m, [33mSparkles[0m, [33mGithub[0m, [33mChrome[0m } [36mf...[0m
+  [90m  |[0m    [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m6 |[0m ...
+  [90m7 |[0m ...[33mops[0m {
+  [90m8 |[0m ...: string, password: string) => [33mPromise[0m<[36mvoid[0m>
+
+The export Github was not found in module [project]/Downloads/nexus-ai/frontend/node_modules/lucide-react/dist/esm/lucide-react.mjs [app-client] (ecmascript).
+Did you mean to import Gift?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./Downloads/nexus-ai/frontend/src/components/views/login.tsx [Client Component Browser]
+    ./Downloads/nexus-ai/frontend/src/app/page.tsx [Client Component Browser]
+    ./Downloads/nexus-ai/frontend/src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./Downloads/nexus-ai/frontend/src/components/views/login.tsx [Client Component SSR]
+    ./Downloads/nexus-ai/frontend/src/app/page.tsx [Client Component SSR]
+    ./Downloads/nexus-ai/frontend/src/app/page.tsx [Server Component]
+
+
+./Downloads/nexus-ai/frontend/src/components/views/login.tsx:5:1
+Export Github doesn't exist in target module
+  [90m3 |[0m ...seState } [36mfrom[0m [32m"react"[0m
+  [90m4 |[0m ...[33mAnimatePresence[0m } [36mfrom[0m [32m"framer-motion"[0m
+[31m[1m>[0m [90m5 |[0m ...[33ml[0m, [33mLock[0m, [33mUser[0m, [33mArrowRight[0m, [33mEye[0m, [33mEyeOff[0m, [33mSparkles[0m, [33mGithub[0m, [33mChrome[0m } [36mf...[0m
+  [90m  |[0m    [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m6 |[0m ...
+  [90m7 |[0m ...[33mops[0m {
+  [90m8 |[0m ...: string, password: string) => [33mPromise[0m<[36mvoid[0m>
+
+The export Github was not found in module [project]/Downloads/nexus-ai/frontend/node_modules/lucide-react/dist/esm/lucide-react.mjs [app-ssr] (ecmascript).
+Did you mean to import Gift?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./Downloads/nexus-ai/frontend/src/components/views/login.tsx [Client Component Browser]
+    ./Downloads/nexus-ai/frontend/src/app/page.tsx [Client Component Browser]
+    ./Downloads/nexus-ai/frontend/src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./Downloads/nexus-ai/frontend/src/components/views/login.tsx [Client Component SSR]
+    ./Downloads/nexus-ai/frontend/src/app/page.tsx [Client Component SSR]
+    ./Downloads/nexus-ai/frontend/src/app/page.tsx [Server Component]
+
+
+    at <unknown> (./Downloads/nexus-ai/frontend/src/components/views/login.tsx:5:1)
+    at <unknown> (./Downloads/nexus-ai/frontend/src/components/views/login.tsx:5:1)
+    at <unknown> (./Downloads/nexus-ai/frontend/src/components/views/login.tsx:5:1)
+    at <unknown> (./Downloads/nexus-ai/frontend/src/components/views/login.tsx:5:1)
