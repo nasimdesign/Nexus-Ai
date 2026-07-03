@@ -1,6 +1,7 @@
 import { create } from "zustand"
 import type { Task, Project, Conversation, Message, Notification, User } from "@/types"
 import { mockTasks, mockProjects, mockConversations, mockNotifications } from "@/lib/mock-data"
+import { signIn, signOut, getSession } from "next-auth/react"
 
 interface AppStore {
   // Navigation
@@ -83,74 +84,45 @@ export const useAppStore = create<AppStore>((set, get) => ({
   // Authentication
   isAuthenticated: false,
   user: null,
-  initAuth: () => {
-    const userData = safeLocalStorage.getItem("nexus_user")
-    if (userData) {
-      try {
-        const user = JSON.parse(userData)
-        set({ isAuthenticated: true, user })
-      } catch {
-        safeLocalStorage.removeItem("nexus_user")
+  initAuth: async () => {
+    // Sync Zustand store with next-auth session
+    try {
+      const session = await getSession()
+      if (session && (session as any).user) {
+        set({ isAuthenticated: true, user: (session as any).user })
+      } else {
+        set({ isAuthenticated: false, user: null })
       }
+    } catch (err) {
+      set({ isAuthenticated: false, user: null })
     }
   },
   login: async (email: string, password: string) => {
-    // Check stored accounts
-    const accounts = JSON.parse(safeLocalStorage.getItem("nexus_accounts") || "[]")
-    const account = accounts.find((a: any) => a.email === email)
-    
-    if (account) {
-      if (account.password !== password) {
-        throw new Error("Invalid email or password")
-      }
-      const user: User = { id: account.id, name: account.name, email: account.email, role: account.role, company: account.company }
-      safeLocalStorage.setItem("nexus_user", JSON.stringify(user))
-      set({ isAuthenticated: true, user })
-    } else {
-      // Demo login: auto-create account on first login
-      const user: User = {
-        id: `u-${Date.now()}`,
-        name: email.split("@")[0],
-        email,
-        role: "Member",
-        company: "Nexus AI",
-      }
-      accounts.push({ ...user, password })
-      safeLocalStorage.setItem("nexus_accounts", JSON.stringify(accounts))
-      safeLocalStorage.setItem("nexus_user", JSON.stringify(user))
-      set({ isAuthenticated: true, user })
+    // This project uses NextAuth Email provider (magic links) and Google provider.
+    // We will attempt an email sign-in (magic link). If you prefer password credentials,
+    // add CredentialsProvider to NextAuth config.
+    const res = await signIn("email", { email, redirect: false })
+    // signIn returns a Promise that resolves to an object when redirect:false
+    // We can't reliably detect success other than checking for an error property
+    if (res && (res as any).error) {
+      throw new Error((res as any).error || "Sign-in failed; check email for magic link")
     }
+    // After the user clicks the magic link they will be signed in; initAuth can sync the state
   },
   loginWithGoogle: async () => {
-    // Simulated Google login for demo
-    const user: User = {
-      id: `u-google-${Date.now()}`,
-      name: "Nexus User",
-      email: "user@gmail.com",
-      role: "Member",
-      company: "Nexus AI",
-    }
-    safeLocalStorage.setItem("nexus_user", JSON.stringify(user))
-    set({ isAuthenticated: true, user })
+    // Redirects to Google sign-in page
+    await signIn("google")
   },
   signup: async (name: string, email: string, password: string) => {
-    const accounts = JSON.parse(safeLocalStorage.getItem("nexus_accounts") || "[]")
-    const existing = accounts.find((a: any) => a.email === email)
-    if (existing) throw new Error("An account with this email already exists")
-    
-    const user: User = {
-      id: `u-${Date.now()}`,
-      name,
-      email,
-      role: "Member",
-      company: "Nexus AI",
+    // For now we use magic link signup via Email provider. NextAuth will create the user via adapter on first sign-in.
+    // Keep the password parameter for compatibility but we do not use it here.
+    const res = await signIn("email", { email, redirect: false })
+    if (res && (res as any).error) {
+      throw new Error((res as any).error || "Signup failed; check email for magic link")
     }
-    accounts.push({ ...user, password })
-    safeLocalStorage.setItem("nexus_accounts", JSON.stringify(accounts))
-    safeLocalStorage.setItem("nexus_user", JSON.stringify(user))
-    set({ isAuthenticated: true, user })
   },
-  logout: () => {
+  logout: async () => {
+    await signOut({ callbackUrl: '/' })
     safeLocalStorage.removeItem("nexus_user")
     set({ isAuthenticated: false, user: null, activeSection: "dashboard" })
   },
